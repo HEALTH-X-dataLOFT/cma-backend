@@ -1,0 +1,10 @@
+with-expecter: true
+packages:
+  ? github.com/HEALTH-X-dataLOFT/cma-backend/pkg/server/api/types
+  : interfaces:
+      ProviderLister:
+      StudyLister:
+      DataspaceConnector:
+      AccessManager:
+      ShareManager:
+      Validator:

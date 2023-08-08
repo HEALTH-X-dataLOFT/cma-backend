@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch cma-backend",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/",
+            "env": {
+                "LOGLEVEL": "debug"
+            },
+            "args": [
+                "server",
+                "--provider-lister=fc",
+                "--provider-catalog-url=https://federated-catalog.example.com",
+                "--provider-public-key-file=/path/to/provider_public_keys.json",
+                "--study-manager=dsp",
+                "--study-catalog-base-uri=https://study.provider.example.com",
+                "--run-dsp-address=localhost:8081",
+                "--run-dsp-insecure"
+            ]
+        }
+    ]
+}

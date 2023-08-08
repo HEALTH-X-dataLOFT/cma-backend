@@ -1,0 +1,384 @@
+# Copyright 2025 HEALTH-X dataLOFT
+#
+# Licensed under the European Union Public Licence, Version 1.2 (the
+# "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://eupl.eu/1.2/en/
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: "3.0.2"
+info:
+  title: CMA backend
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /api/providers:
+    get:
+      summary: Get providers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Provider"
+  /api/providers/{provider_id}/files:
+    get:
+      summary: "Get the the list of your files hosted by provider"
+      security:
+        - Bearer: []
+      parameters:
+        - name: provider_id
+          description: The provider id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderFile"
+  /api/providers/{provider_id}/files/{provider_file_id}:
+    get:
+      summary: "Download a file from provider given provider_id and provider_file_id"
+      security:
+        - Bearer: []
+      parameters:
+        - name: provider_id
+          description: The provider id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: provider_file_id
+          description: The file id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/providers/{provider_id}/files/{provider_file_id}/credentials:
+    get:
+      summary: "Retrieve credentials for downloading a file from provider given provider_id and provider_file_id"
+      security:
+        - Bearer: []
+      parameters:
+        - name: provider_id
+          description: The provider id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: provider_file_id
+          description: The file id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadCredentials"
+  /api/policies:
+    get:
+      summary: "Get the the list of policy permissions given to providers for accessing your data"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Policy"
+    post:
+      summary: "Create a new policy permission for a provider to access your data"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyRequest"
+      responses:
+        "204":
+          description: No Content
+  /api/policies/{policy_id}:
+    delete:
+      summary: "Delete a policy permission given its id"
+      parameters:
+        - name: policy_id
+          description: The policy id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+  /api/shares:
+    post:
+      summary: "Publish a file for sharing with other non-dataspace apps"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShareRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareResponse"
+  /api/studies:
+    get:
+      summary: "Get the the list of studies available to participate in"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Study"
+  /api/studies/{study_id}:
+    get:
+      summary: "Get the details of a study given its id"
+      parameters:
+        - name: study_id
+          description: The study id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Study"
+  /api/studies/{study_id}/files:
+    get:
+      summary: "Get the the list of files available to share with a given study"
+      parameters:
+        - name: study_id
+          description: The study id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderFile"
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AccessType:
+      description: Level of access that a provider has to the resource
+      type: integer
+      enum: [0, 1, 2]
+      x-enum-varnames: [full, pseudonymized, anonymized]
+    DownloadCredentials:
+      description: Credentials and location of file to download
+      type: object
+      properties:
+        authentication_type:
+          type: integer
+          enum: [0, 1, 2]
+          x-enum-varnames: [unspecified, bearer_token, basic_auth]
+        url:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    Organization:
+      description: An organization running a study
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    ProviderFile:
+      description: A file hosted by a provider
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        mime_type:
+          type: string
+        size:
+          type: integer
+          format: int64
+        provider:
+          $ref: "#/components/schemas/Provider"
+    Policy:
+      description: A policy describing the permission given to a provider for accessing a resource
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        target:
+          $ref: "#/components/schemas/ProviderFile"
+        assignee:
+          $ref: "#/components/schemas/Provider"
+        access_type:
+          $ref: "#/components/schemas/AccessType"
+    PolicyRequest:
+      description: A policy permission request to set access permissions for a provider to a resource
+      type: object
+      properties:
+        target:
+          $ref: "#/components/schemas/Target"
+        assignee:
+          type: string
+          format: uuid
+        access_type:
+          $ref: "#/components/schemas/AccessType"
+    Provider:
+      description: A provider of data
+      type: object
+      properties:
+        id:
+          type: string
+          format: string
+        name:
+          type: string
+        description:
+          type: string
+        logo_uri:
+          type: string
+          format: uri
+        contact_information:
+          type: string
+        verifiable_credential:
+          type: string
+        provider_url:
+          type: string
+        public_key:
+          type: string
+    ResearchData:
+      description: The ResearchData object identifies a class of wanted research data and required data access type
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        data_type:
+          type: string
+        access_type:
+          $ref: "#/components/schemas/AccessType"
+    ShareRequest:
+      description: A request to publish a file for sharing with other non-dataspace apps
+      type: object
+      properties:
+        target:
+          $ref: "#/components/schemas/Target"
+        key:
+          type: string
+    ShareResponse:
+      description: A response containing the additional information needed to download the shared file
+      type: object
+      properties:
+        ttl:
+          type: integer
+          format: int64
+        download_uri:
+          type: string
+          format: uri
+        bearer_token:
+          type: string
+    Study:
+      description: A representation of a research study
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization:
+          $ref: "#/components/schemas/Organization"
+        name:
+          type: string
+        description:
+          type: string
+        description_summary:
+          type: string
+        study_uri:
+          type: string
+          format: uri
+        study_start:
+          type: integer
+          format: int64
+        study_end:
+          type: integer
+          format: int64
+        research_data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResearchData"
+    Target:
+      description: The target of a policy permission request
+      type: object
+      properties:
+        provider:
+          type: string
+          format: uuid
+        file:
+          type: string
+          format: uuid
