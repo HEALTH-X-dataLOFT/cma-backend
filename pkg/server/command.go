@@ -97,11 +97,9 @@ func (c *Command) Run(p cli.Params) error {
 	logger := logging.Extract(ctx)
 	logger.Info("Starting server", "listenAddr", c.ListenAddr, "port", c.Port)
 	logger.Info("Starting prometheus metrics", "listenAddr", c.ListenAddr, "port", c.PrometheusPort)
-
 	var wg sync.WaitGroup
 	ctx = waitgroup.Inject(ctx, &wg)
 	ctx, cancel := context.WithCancel(ctx)
-
 	defer func() {
 		logger.Info("Cleaning up")
 		cancel()

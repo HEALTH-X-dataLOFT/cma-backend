@@ -228,7 +228,7 @@ func normaliseProviders(
 		h := sha256.New()
 		_, err := h.Write([]byte(vc.CredentialSubject.ID))
 		if err != nil {
-			return nil, fmt.Errorf("Failed to generate hash from ID %s", vc.CredentialSubject.ID)
+			return nil, fmt.Errorf("failed to generate hash from ID %s", vc.CredentialSubject.ID)
 		}
 
 		n = append(n, ProviderInfo{

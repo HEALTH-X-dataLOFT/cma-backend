@@ -63,7 +63,7 @@ passed on using authentication headers.
 
 ### Requirements
 
-* go - For building the application (currently version 1.23.6)
+* go - For building the application (currently version 1.24.4)
 * redis - For storing results from listing studies etc
 * public key for the available providers  (required for clients to use end-to-end encryption)
 * an instance of [RUN-DSP](https://github.com/go-dataspace/run-dsp)
