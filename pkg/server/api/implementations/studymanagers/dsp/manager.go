@@ -167,6 +167,7 @@ func (sm *StudyManager) updateStudies(ctx context.Context) {
 	})
 	if err != nil {
 		logger.Error("failed to retrieve catalogue", "error", err)
+		return
 	}
 	if len(catalogue.Datasets) != 1 {
 		logger.Error("catalogue does not contain single dataset", "num_items", len(catalogue.Datasets))
